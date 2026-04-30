@@ -1,8 +1,8 @@
-Read Hari_Work/_System/INDEX.md to find all AI Strategy knowledge paths.
+Read INDEX.md to find all AI Strategy knowledge paths.
 
 Then read ALL notes across every source listed under "AI Strategy" in INDEX.md — currently:
-- Hari_Work/Knowledge/AI-Strategy/Cornell/Notes/ (all .md insight notes)
-- Hari_Work/Knowledge/AI-Strategy/UPenn/Notes/ (all .md insight notes)
+- Knowledge/Strategy/Cornell/Notes/ (all .md insight notes)
+- Knowledge/Strategy/UPenn/Notes/ (all .md insight notes)
 
 Synthesize the knowledge to answer the user's question: $ARGUMENTS
 

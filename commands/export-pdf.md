@@ -5,7 +5,7 @@ If no argument is provided, ask the user which file to export.
 
 Run this bash command:
 ```
-cd "${VAULT_ROOT:-$HOME/Library/CloudStorage/OneDrive-3Cloud/3Cloud}" && md-to-pdf "$ARGUMENTS"
+cd "${VAULT_ROOT:-/AI-Projects/3cloud-vault/Hari_Work}" && md-to-pdf "$ARGUMENTS"
 ```
 
 The PDF will be saved in the same folder as the source .md file with the same filename.

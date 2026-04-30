@@ -1,28 +1,28 @@
 Compose a defensible Azure reference architecture (diagram + decision record) using 3Cloud's Architecture-Selector and Microsoft's official Azure icons: $ARGUMENTS
 
 Step 1 — Load the methodology
-Read Hari_Work/_System/skills/reference-architecture.md and follow its Step-by-Step Instructions exactly. That file is the authoritative specification for this command.
+Read _System/skills/reference-architecture.md and follow its Step-by-Step Instructions exactly. That file is the authoritative specification for this command.
 
 Step 2 — Detect mode
 Based on $ARGUMENTS and filesystem state:
 - If $ARGUMENTS contains --evolve, run in Evolve mode
 - If $ARGUMENTS contains --review, run in Review mode (read-only)
 - If $ARGUMENTS is a path to a PRD, use that as the brief
-- If $ARGUMENTS contains --client followed by a client name, read Hari_Work/Clients/<name>/Client Context.md
+- If $ARGUMENTS contains --client followed by a client name, read Clients/<name>/Client Context.md
 - If $ARGUMENTS is empty, look for docs/PRD.md in the current directory or enter Interactive mode
 
 Announce the detected mode clearly at the start of the response. Never silently switch modes.
 
 Step 3 — Load framework context
 Read these files from the vault:
-- Hari_Work/3Cloud-Practice/AI-Engineering/ENGINEERING.md
-- Hari_Work/3Cloud-Practice/AI-Engineering/Agent-Factory/Architecture-Selector.md
-- Hari_Work/3Cloud-Practice/AI-Engineering/Agent-Factory/Azure-Icon-Map.md
-- Hari_Work/3Cloud-Practice/AI-Engineering/Agent-Factory/Layer-Canonical-Components.md
-- Hari_Work/3Cloud-Practice/AI-Engineering/Templates/Reference-Architecture.drawio
-- Hari_Work/3Cloud-Practice/AI-Engineering/Templates/Architecture-Decision-Record.template.md
-- Hari_Work/3Cloud-Practice/AI-Engineering/Templates/Evolution-Notes.template.md
-- Hari_Work/3Cloud-Practice/AI-Engineering/Templates/Component-Inventory.template.json
+- Knowledge/Practice/AI-Engineering/ENGINEERING.md
+- Knowledge/Practice/AI-Engineering/Agent-Factory/Architecture-Selector.md
+- Knowledge/Practice/AI-Engineering/Agent-Factory/Azure-Icon-Map.md
+- Knowledge/Practice/AI-Engineering/Agent-Factory/Layer-Canonical-Components.md
+- Knowledge/Practice/AI-Engineering/Templates/Reference-Architecture.drawio
+- Knowledge/Practice/AI-Engineering/Templates/Architecture-Decision-Record.template.md
+- Knowledge/Practice/AI-Engineering/Templates/Evolution-Notes.template.md
+- Knowledge/Practice/AI-Engineering/Templates/Component-Inventory.template.json
 
 Step 4 — Ask Tier 1 strategic questions
 The 5 anchor questions per the methodology. If the brief answers any of them, confirm the extracted answer rather than re-asking.

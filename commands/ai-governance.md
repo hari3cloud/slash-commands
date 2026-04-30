@@ -1,8 +1,8 @@
-Read Hari_Work/_System/INDEX.md to find the AI Governance knowledge path.
+Read INDEX.md to find the AI Governance knowledge path.
 
 Then read ONLY the governance-relevant notes:
-- Hari_Work/Knowledge/AI-Strategy/UPenn/Notes/ (primary source)
-- Scan Hari_Work/Knowledge/AI-Strategy/Cornell/Notes/ for any notes tagged [ai-governance] or [ai-risk]
+- Knowledge/Strategy/UPenn/Notes/ (primary source)
+- Scan Knowledge/Strategy/Cornell/Notes/ for any notes tagged [ai-governance] or [ai-risk]
 
 Synthesize the governance knowledge to answer: $ARGUMENTS
 

@@ -1,18 +1,18 @@
 Activate the full 3Cloud AI Strategic Advisory practice for the client or topic: $ARGUMENTS
 
 Step 1 — Load practice context
-Read Hari_Work/_System/skills/advisory.md and follow its Step-by-Step Instructions.
+Read _System/skills/advisory.md and follow its Step-by-Step Instructions.
 
 Step 2 — Load client context
-Read Hari_Work/Clients/$ARGUMENTS/Client Context.md
+Read Clients/$ARGUMENTS/Client Context.md
 If it doesn't exist, ask the user for: client name, industry, engagement type, and key context.
 
 Step 3 — Load knowledge
-Read Hari_Work/_System/INDEX.md to find relevant knowledge paths.
+Read INDEX.md to find relevant knowledge paths.
 Based on the client's industry and engagement type, read:
-- Hari_Work/3Cloud-Practice/AI-Strategic-Advisory/ADVISORY.md — practice identity + positioning
-- Hari_Work/Knowledge/AI-Strategy/Cornell/Notes/ — for strategy frameworks
-- Hari_Work/Knowledge/AI-Strategy/UPenn/Notes/ — for governance frameworks
+- Knowledge/Practice/AI-Strategic-Advisory/ADVISORY.md — practice identity + positioning
+- Knowledge/Strategy/Cornell/Notes/ — for strategy frameworks
+- Knowledge/Strategy/UPenn/Notes/ — for governance frameworks
 - Industry intelligence frameworks from AI-Strategic-Advisory/Frameworks/ as applicable
 
 Step 4 — Execute the Think-Plan-Approve-Execute loop

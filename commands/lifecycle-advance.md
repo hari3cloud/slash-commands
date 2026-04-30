@@ -5,7 +5,7 @@ If `$ARGUMENTS` is empty: ask which phase to transition to, based on current sta
 
 ## Execution
 
-1. Read `${VAULT_ROOT:-$HOME/Library/CloudStorage/OneDrive-3Cloud/3Cloud}/Hari_Work/_System/skills/project-lifecycle.md` for the canonical 5-phase model and transition gate questions.
+1. Read `${VAULT_ROOT:-/AI-Projects/3cloud-vault/Hari_Work}/_System/skills/project-lifecycle.md` for the canonical 5-phase model and transition gate questions.
 
 2. Read current state from `./.claude/lifecycle.json`. Identify current phase.
 

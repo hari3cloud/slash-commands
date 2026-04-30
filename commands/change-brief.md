@@ -11,7 +11,7 @@ Special flags:
 
 ## Execution
 
-1. Read the methodology skill at `${VAULT_ROOT:-$HOME/Library/CloudStorage/OneDrive-3Cloud/3Cloud}/Hari_Work/_System/skills/change-brief.md` to know what makes a good brief.
+1. Read the methodology skill at `${VAULT_ROOT:-/AI-Projects/3cloud-vault/Hari_Work}/_System/skills/change-brief.md` to know what makes a good brief.
 
 2. Confirm we're in a project repo (look for `.claude/lifecycle.json`). If not, ask which project directory the brief is for.
 
@@ -25,7 +25,7 @@ Special flags:
    5. tech-debt — security/deps/performance/observability
    ```
 
-4. Read the corresponding template from `${VAULT_ROOT:-$HOME/Library/CloudStorage/OneDrive-3Cloud/3Cloud}/Hari_Work/3Cloud-Practice/AI-Engineering/Templates/change-brief/<type>.template.md`
+4. Read the corresponding template from `${VAULT_ROOT:-/AI-Projects/3cloud-vault/Hari_Work}/3Cloud-Practice/AI-Engineering/Templates/change-brief/<type>.template.md`
 
 5. **Interactive authoring** — walk through sections in order:
    - Title (one line)

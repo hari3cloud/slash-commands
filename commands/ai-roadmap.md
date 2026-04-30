@@ -1,15 +1,15 @@
 Generate an AI roadmap for the client specified in $ARGUMENTS.
 
 Step 1 — Read client context
-Read Hari_Work/_System/INDEX.md first.
-Then read Hari_Work/Clients/$ARGUMENTS/Client Context.md
+Read INDEX.md first.
+Then read Clients/$ARGUMENTS/Client Context.md
 If it doesn't exist, ask the user to provide: industry, AI maturity, key pain points, mission/vision, and constraints.
 
 Step 2 — Select and read relevant knowledge
 Based on the client context, read only the applicable notes:
-- For strategy and portfolio: Hari_Work/Knowledge/AI-Strategy/Cornell/Notes/
-- For governance and risk: Hari_Work/Knowledge/AI-Strategy/UPenn/Notes/
-- For technical architecture: Hari_Work/Knowledge/Architecture/
+- For strategy and portfolio: Knowledge/Strategy/Cornell/Notes/
+- For governance and risk: Knowledge/Strategy/UPenn/Notes/
+- For technical architecture: Knowledge/Architecture/
 Pull from multiple domains when the client needs both strategy and governance.
 
 Step 3 — Generate the roadmap using this structure:
@@ -25,8 +25,8 @@ Step 3 — Generate the roadmap using this structure:
 ## Next Steps
 
 Step 4 — Save the output
-Save as: Hari_Work/Clients/$ARGUMENTS/{ClientName} AI Roadmap {YYYY-MM-DD}.md
-Then update Hari_Work/_System/memory.md with the date and client name.
+Save as: Clients/$ARGUMENTS/{ClientName} AI Roadmap {YYYY-MM-DD}.md
+Then update _System/memory.md with the date and client name.
 
 ## Citation and Attribution Rules
 IMPORTANT — these rules govern how frameworks are referenced throughout the roadmap:

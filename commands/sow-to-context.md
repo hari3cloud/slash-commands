@@ -1,7 +1,7 @@
 Extract client context from a 3Cloud Statement of Work for: $ARGUMENTS
 
 Step 1 — Load the extraction skill
-Read Hari_Work/_System/skills/sow-to-context.md — this contains the full SOW → Client Context field mapping, extraction protocol, and template.
+Read _System/skills/sow-to-context.md — this contains the full SOW → Client Context field mapping, extraction protocol, and template.
 
 Step 2 — Find the SOW
 Look for a .docx or .pdf file in the current directory, uploads, or ask the user to specify the SOW file path.
@@ -25,5 +25,5 @@ Step 5 — Generate Open Questions for Kickoff
 For every ⚠️ field, create a specific question grouped by the workshop where it'll naturally be answered.
 
 Step 6 — Save
-Save to: Hari_Work/Clients/$ARGUMENTS/Client Context.md
+Save to: Clients/$ARGUMENTS/Client Context.md
 Report what was extracted and what needs enrichment.

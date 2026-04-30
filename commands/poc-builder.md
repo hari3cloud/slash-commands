@@ -1,12 +1,12 @@
 Activate the 3Cloud AI Engineering PoC Factory for the client: $ARGUMENTS
 
 Step 1 — Load practice context
-Read Hari_Work/_System/INDEX.md first.
-Read Hari_Work/3Cloud-Practice/AI-Engineering/ENGINEERING.md — master practice context.
-Read Hari_Work/3Cloud-Practice/AI-Engineering/Agent-Factory/Master-Prompt.md — 10-step pipeline.
+Read INDEX.md first.
+Read Knowledge/Practice/AI-Engineering/ENGINEERING.md — master practice context.
+Read Knowledge/Practice/AI-Engineering/Agent-Factory/Master-Prompt.md — 10-step pipeline.
 
 Step 2 — Load client context
-Check Hari_Work/Clients/$ARGUMENTS/ for advisory context (Client Context.md, roadmaps, etc.)
+Check Clients/$ARGUMENTS/ for advisory context (Client Context.md, roadmaps, etc.)
 If no advisory context exists, note: "No advisory context — all decisions from PRD + customer."
 
 Step 3 — Find the PRD

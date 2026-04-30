@@ -8,7 +8,7 @@ This command also responds to the legacy invocation `/enhancement` for backward 
 
 ## Execution
 
-Read the methodology skill at `${VAULT_ROOT:-$HOME/Library/CloudStorage/OneDrive-3Cloud/3Cloud}/Hari_Work/_System/skills/enhancement.md` and follow it exactly. That skill is the authoritative process for this command.
+Read the methodology skill at `${VAULT_ROOT:-/AI-Projects/3cloud-vault/Hari_Work}/_System/skills/enhancement.md` and follow it exactly. That skill is the authoritative process for this command.
 
 The skill walks through:
 
