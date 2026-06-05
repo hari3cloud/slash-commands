@@ -68,4 +68,4 @@ If `$ARGUMENTS` is empty: ask which phase to transition to, based on current sta
 - Never transition without user confirmation
 - Never modify lifecycle.json beyond the phase fields (don't touch changes lists, brief_path, etc.)
 - Always preserve full phase_history (audit trail)
-- If `lifecycle.json` doesn't exist, this command can't run — direct user to `/fleet-generate` first to initialize
+- If `lifecycle.json` doesn't exist, this command can't run — direct user to `/poc-builder` first to initialize
