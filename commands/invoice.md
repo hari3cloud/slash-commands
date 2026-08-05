@@ -1,0 +1,73 @@
+Create or update a client subscription tracker and generate a branded PDF invoice from it: $ARGUMENTS
+
+The toolkit lives at `/Users/harit/AI-Projects/slash-commands/invoicing/invoice.py`.
+It has two subcommands. The **workbook is the single source of truth** — `invoice`
+only ever READS it, so regenerating can never clobber figures the operator typed.
+
+## Decide which mode
+
+- `$ARGUMENTS` names a **new client** (or no tracker exists yet) → run `init`, then
+  tell them what to fill in.
+- `$ARGUMENTS` names an **existing client**, or asks to bill/regenerate/re-issue →
+  run `invoice` against their existing workbook.
+- `$ARGUMENTS` is empty → ask which client, and whether they want a new tracker or
+  an invoice from an existing one.
+
+Never run `init` against an existing workbook without `--force`; it refuses by
+default precisely because it would wipe entered amounts.
+
+## New client
+
+```
+python3 /Users/harit/AI-Projects/slash-commands/invoicing/invoice.py init \
+  --client "<who you're billing>" \
+  --company "<your company>" \
+  --out "<directory for the workbook>" \
+  --logo "<path to your logo PNG>" \
+  [--months 12] [--rows 12] [--start YYYY-MM]
+```
+
+Then tell them exactly what to fill: the vendor rows in **Subscriptions**, and the
+amber cells in **Invoice** (payment due, bill-to address). Amber = still needs a
+real figure.
+
+## Generate the invoice
+
+```
+python3 /Users/harit/AI-Projects/slash-commands/invoicing/invoice.py invoice \
+  --book "<path to the workbook>" [--month Sep-2026] [--out <file.pdf>]
+```
+
+Defaults to the month named in the workbook's **Billing month** cell. Pass
+`--month` to bill a different period without editing the sheet.
+
+## Always report the "NOT BILLED" line
+
+The script prints `NOT BILLED (blank in the sheet): …` for every vendor whose
+amount cell is empty. **Surface that to the user every time** — a blank cell is
+the one way to silently under-invoice, so the warning existing is the whole point.
+Offer to fill those figures before sending.
+
+## Before telling them it's ready to send
+
+Check and mention any of these that apply:
+
+- **Placeholder bill-to fields.** Empty address lines are simply omitted from the
+  PDF, so an incomplete address renders as a *plausible-looking* invoice. Say so
+  rather than letting it go out.
+- **Estimated vs verified amounts.** The *Verified* column is there for this. Call
+  out anything still marked "Needs check", especially the largest lines.
+- **Metered vendors mid-month.** Anything usage-billed (cloud, AI APIs) isn't final
+  until the month closes. Recommend issuing after close, or label it clearly.
+
+## Notes
+
+- Requires `openpyxl` and Chrome/Chromium (headless) for rendering. The PDF is real
+  vector text, not a screenshot.
+- Layout mirrors the Odyssey Tech invoice: logo left, `INVOICE` right, bill-to and
+  meta blocks, dark-header items table, footer. If no logo path resolves, the
+  company name renders as a wordmark instead.
+- A vendor row whose Status starts with "cancelled" and whose amount is 0 is
+  dropped from the invoice but kept in the workbook for history.
+- Set `Include zero-value lines` to `no` in the Invoice sheet to hide $0.00 rows.
+  Default `yes` — showing them documents the full stack the client is getting.
