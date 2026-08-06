@@ -128,7 +128,9 @@ def cmd_init(a) -> None:
               "Active", "Needs check", "Apollo.io — B2B contact and company database")]
             if a.mode == "subscriptions" else
             [("(example) Cloud engineering", "Platform", "GovCloud migration", "hour",
-              "Active", "Needs check", "Cloud engineering — GovCloud migration", 185)])
+              "Active", "Needs check",
+              "Cloud engineering — GovCloud migration (hourly: put your rate in Rate, hours in the month column)",
+              None)])
     blank = ("", "", "", "", "", "ENTER AMOUNT", "") + (("",) if a.mode == "services" else ())
     rows = seed + [blank] * max(0, a.rows - 1)
     for r, v in enumerate(rows, start=HEAD_ROW + 1):
@@ -363,6 +365,9 @@ def cmd_invoice(a) -> None:
     shutil.rmtree(tmp, ignore_errors=True)
 
     print(f"wrote {out}")
+    for d, q, pr, amt in items:
+        qty_note = "" if q == 1 else f"  ({q:g} x ${pr:,.2f})"
+        print(f"   {d[:58]:<58} ${amt:>12,.2f}{qty_note}")
     print(f"period {month} · {len(items)} line items · total ${total:,.2f}")
     if missing:
         # Loud on purpose: a blank cell is the one way to under-bill silently.
