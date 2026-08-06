@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import re
 import html
 import shutil
 import subprocess
@@ -43,8 +44,21 @@ CHROME_CANDIDATES = [
     "/usr/bin/chromium",
 ]
 
-HEADERS = ["Vendor", "Category", "Plan / Tier", "Billing basis", "Status",
-           "Verified", "Invoice description"]
+# Two tracker shapes.
+#   subscriptions — YOU pay the vendors and pass the cost through (Clarity i2).
+#                   A month cell holds the AMOUNT billed.
+#   services      — the client owns and pays for their own subscriptions
+#                   (Cyber9 owns its GovCloud), so you bill WORK instead.
+#                   A month cell holds a QUANTITY and the row's Rate turns it
+#                   into money. Set Rate blank on a row to bill a flat amount
+#                   (retainer) in the same sheet.
+SHAPES = {
+    "subscriptions": ["Vendor", "Category", "Plan / Tier", "Billing basis", "Status",
+                      "Verified", "Invoice description"],
+    "services":      ["Service", "Workstream", "Engagement", "Unit", "Status",
+                      "Verified", "Invoice description", "Rate"],
+}
+HEADERS = SHAPES["subscriptions"]   # legacy default; init picks by --mode
 FIRST_MONTH_COL = len(HEADERS) + 1
 HEAD_ROW = 4
 MNAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -74,7 +88,10 @@ def cmd_init(a) -> None:
     out_dir = Path(a.out).expanduser()
     out_dir.mkdir(parents=True, exist_ok=True)
     slug = "".join(ch for ch in a.client if ch.isalnum() or ch in " -_").strip().replace(" ", "_")
-    book = out_dir / f"{slug}_Subscriptions.xlsx"
+    headers = SHAPES[a.mode]
+    first_month = len(headers) + 1
+    suffix = "Subscriptions" if a.mode == "subscriptions" else "Services"
+    book = out_dir / f"{slug}_{suffix}.xlsx"
     if book.exists() and not a.force:
         sys.exit(f"{book} already exists — refusing to overwrite. Use --force to replace it.")
 
@@ -87,35 +104,44 @@ def cmd_init(a) -> None:
 
     wb = Workbook()
     ws = wb.active
-    ws.title = "Subscriptions"
-    ws["A1"] = f"{a.client} — Platform Subscriptions"
+    ws.title = suffix
+    ws["A1"] = f"{a.client} — {'Platform Subscriptions' if a.mode == 'subscriptions' else 'Services'}"
     ws["A1"].font = Font(bold=True, size=15, color=INK)
-    ws["A2"] = ("Enter the amount actually billed in each month's column. Amber cells still need a real figure. "
-                "The TOTAL row and the PDF invoice both read from this sheet.")
+    ws["A2"] = (("Enter the amount actually billed in each month's column. "
+                 if a.mode == "subscriptions" else
+                 "Set a Rate per row, then enter the QUANTITY (hours/units) in each month's column — "
+                 "amount = quantity x rate. Leave Rate blank to bill a flat amount instead. ")
+                + "Amber cells still need a real figure. The TOTAL row and the PDF invoice both read from this sheet.")
     ws["A2"].font = Font(size=9, italic=True, color="6B767B")
 
-    for i, h in enumerate(HEADERS, start=1):
+    for i, h in enumerate(headers, start=1):
         c = ws.cell(row=HEAD_ROW, column=i, value=h)
         c.font, c.fill, c.border = Font(bold=True, color="FFFFFF", size=10), HEAD_FILL, BOX
         c.alignment = Alignment(vertical="center", wrap_text=True)
     for j, (yy, mm) in enumerate(months):
-        c = ws.cell(row=HEAD_ROW, column=FIRST_MONTH_COL + j, value=month_label(yy, mm))
+        c = ws.cell(row=HEAD_ROW, column=first_month + j, value=month_label(yy, mm))
         c.font, c.fill, c.border = Font(bold=True, color="FFFFFF", size=10), HEAD_FILL, BOX
         c.alignment = Alignment(horizontal="center", vertical="center")
 
     # One example row so the shape is obvious, then blanks to fill in.
-    seed = [("(example) Apollo.io", "Data", "Organization seat", "Monthly subscription",
-             "Active", "Needs check", "Apollo.io — B2B contact and company database")]
-    rows = seed + [("", "", "", "", "", "ENTER AMOUNT", "")] * max(0, a.rows - 1)
+    seed = ([("(example) Apollo.io", "Data", "Organization seat", "Monthly subscription",
+              "Active", "Needs check", "Apollo.io — B2B contact and company database")]
+            if a.mode == "subscriptions" else
+            [("(example) Cloud engineering", "Platform", "GovCloud migration", "hour",
+              "Active", "Needs check", "Cloud engineering — GovCloud migration", 185)])
+    blank = ("", "", "", "", "", "ENTER AMOUNT", "") + (("",) if a.mode == "services" else ())
+    rows = seed + [blank] * max(0, a.rows - 1)
     for r, v in enumerate(rows, start=HEAD_ROW + 1):
         for i, val in enumerate(v, start=1):
             c = ws.cell(row=r, column=i, value=val or None)
             c.border, c.font = BOX, Font(size=10, color=INK)
             c.alignment = Alignment(vertical="center", wrap_text=(i == 7))
+            if headers[i - 1] == "Rate":
+                c.number_format = MONEY
             if r % 2 == 0:
                 c.fill = BAND
         for j in range(len(months)):
-            c = ws.cell(row=r, column=FIRST_MONTH_COL + j)
+            c = ws.cell(row=r, column=first_month + j)
             c.number_format, c.border = MONEY, BOX
             c.alignment = Alignment(horizontal="right")
             c.fill = NEEDS
@@ -123,23 +149,24 @@ def cmd_init(a) -> None:
     trow = HEAD_ROW + len(rows) + 1
     ws.cell(row=trow, column=1, value="TOTAL (USD)").font = Font(bold=True, size=11, color=INK)
     ws.cell(row=trow, column=1).border = BOX
-    for i in range(2, FIRST_MONTH_COL):
+    for i in range(2, first_month):
         ws.cell(row=trow, column=i).border = BOX
     for j in range(len(months)):
-        col = get_column_letter(FIRST_MONTH_COL + j)
-        c = ws.cell(row=trow, column=FIRST_MONTH_COL + j,
+        col = get_column_letter(first_month + j)
+        c = ws.cell(row=trow, column=first_month + j,
                     value=f"=SUM({col}{HEAD_ROW+1}:{col}{trow-1})")
         c.number_format, c.border = MONEY, BOX
         c.font = Font(bold=True, size=11, color=INK)
         c.fill = PatternFill("solid", fgColor="E3EAEF")
         c.alignment = Alignment(horizontal="right")
 
-    for col, w in {"A": 21, "B": 14, "C": 21, "D": 21, "E": 17, "F": 19, "G": 62}.items():
-        ws.column_dimensions[col].width = w
+    widths = {"A": 24, "B": 16, "C": 22, "D": 14, "E": 15, "F": 19, "G": 58, "H": 11}
+    for i in range(len(headers)):
+        ws.column_dimensions[get_column_letter(i + 1)].width = widths.get(get_column_letter(i + 1), 16)
     for j in range(len(months)):
-        ws.column_dimensions[get_column_letter(FIRST_MONTH_COL + j)].width = 12
+        ws.column_dimensions[get_column_letter(first_month + j)].width = 12
     ws.row_dimensions[HEAD_ROW].height = 26
-    ws.freeze_panes = ws.cell(row=HEAD_ROW + 1, column=FIRST_MONTH_COL)
+    ws.freeze_panes = ws.cell(row=HEAD_ROW + 1, column=first_month)
 
     iv = wb.create_sheet("Invoice")
     iv["A1"] = "Invoice settings"
@@ -201,35 +228,51 @@ def read_book(book: Path, month_override: str | None):
             cfg[str(k).strip()] = iv.cell(row=r, column=2).value
 
     month = month_override or str(cfg.get("Billing month", "")).strip()
-    ws = wb["Subscriptions"]
-    col = None
-    for c in range(FIRST_MONTH_COL, ws.max_column + 1):
-        if str(ws.cell(row=HEAD_ROW, column=c).value).strip() == month:
-            col = c
-            break
+    ws = wb[wb.sheetnames[0]]
+
+    # Columns are located by HEADER TEXT, never by fixed index. Two reasons:
+    # a services tracker carries a Rate column that a subscription one doesn't,
+    # and workbooks created before Rate existed must keep working untouched.
+    hdr: dict[str, int] = {}
+    for c in range(1, ws.max_column + 1):
+        v = ws.cell(row=HEAD_ROW, column=c).value
+        if v:
+            hdr[str(v).strip()] = c
+    name_col = hdr.get("Vendor") or hdr.get("Service") or 1
+    status_col = hdr.get("Status")
+    desc_col = hdr.get("Invoice description")
+    rate_col = hdr.get("Rate")
+    col = hdr.get(month)
     if col is None:
-        avail = [str(ws.cell(row=HEAD_ROW, column=c).value)
-                 for c in range(FIRST_MONTH_COL, ws.max_column + 1)]
-        sys.exit(f"Month {month!r} not found. Available: {', '.join(avail)}")
+        avail = [k for k in hdr if re.fullmatch(r"[A-Z][a-z]{2}-\d{4}", k)]
+        sys.exit(f"Month {month!r} not found. Available: {', '.join(avail) or '(none)'}")
 
     include_zero = str(cfg.get("Include zero-value lines", "yes")).strip().lower() in ("yes", "y", "true")
     items, total, missing = [], 0.0, []
     for r in range(HEAD_ROW + 1, ws.max_row + 1):
-        vendor = ws.cell(row=r, column=1).value
-        if not vendor or str(vendor).strip().upper().startswith("TOTAL"):
+        name = ws.cell(row=r, column=name_col).value
+        if not name or str(name).strip().upper().startswith("TOTAL"):
             continue
-        status = str(ws.cell(row=r, column=5).value or "")
-        desc = ws.cell(row=r, column=7).value or vendor
-        amt = ws.cell(row=r, column=col).value
-        if amt is None:
-            missing.append(str(vendor))
-            continue                       # never invent a figure
-        amt = float(amt)
+        status = str(ws.cell(row=r, column=status_col).value or "") if status_col else ""
+        desc = (ws.cell(row=r, column=desc_col).value if desc_col else None) or name
+        cell = ws.cell(row=r, column=col).value
+        if cell is None:
+            missing.append(str(name))       # never invent a figure
+            continue
+        rate = ws.cell(row=r, column=rate_col).value if rate_col else None
+        if rate not in (None, "", 0):
+            # Services shape: the month cell is a QUANTITY (hours, units) and
+            # the row's Rate turns it into money.
+            qty, price = float(cell), float(rate)
+            amt = qty * price
+        else:
+            # Subscription shape: the month cell IS the amount.
+            qty, price, amt = 1.0, float(cell), float(cell)
         if status.lower().startswith("cancelled") and amt == 0:
-            continue                       # retired vendor, nothing to bill
+            continue                        # retired line, kept for history
         if amt == 0 and not include_zero:
             continue
-        items.append((str(desc), amt))
+        items.append((str(desc), qty, price, amt))
         total += amt
     return cfg, month, items, total, missing
 
@@ -250,9 +293,12 @@ def render_html(cfg, month, items, total) -> str:
     addr = [g("Bill to — company"), g("Bill to — contact"), g("Bill to — street"),
             g("Bill to — suite"), g("Bill to — city/state/zip"), g("Bill to — country"),
             g("Bill to — phone"), g("Bill to — email")]
+    def qfmt(q: float) -> str:
+        return str(int(q)) if q == int(q) else f"{q:g}"
     rows = "".join(
-        f"<tr><td class='d'>{html.escape(d)}</td><td class='q'>1</td>"
-        f"<td class='m'>${a:,.2f}</td><td class='m'>${a:,.2f}</td></tr>" for d, a in items)
+        f"<tr><td class='d'>{html.escape(d)}</td><td class='q'>{qfmt(q)}</td>"
+        f"<td class='m'>${pr:,.2f}</td><td class='m'>${a:,.2f}</td></tr>"
+        for d, q, pr, a in items)
 
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
   @page {{ size: Letter; margin: 0.6in 0.7in; }}
@@ -329,6 +375,9 @@ def main() -> None:
 
     i = sub.add_parser("init", help="create a tracker workbook for a client")
     i.add_argument("--client", required=True, help="who you're billing")
+    i.add_argument("--mode", choices=["subscriptions", "services"], default="subscriptions",
+                   help="subscriptions = you front vendor costs and pass them through; "
+                        "services = the client pays their own vendors, you bill work")
     i.add_argument("--company", default="", help="your company (appears on the invoice)")
     i.add_argument("--out", required=True, help="directory for the workbook")
     i.add_argument("--logo", default="", help="path to your logo PNG")

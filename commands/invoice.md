@@ -16,16 +16,32 @@ only ever READS it, so regenerating can never clobber figures the operator typed
 Never run `init` against an existing workbook without `--force`; it refuses by
 default precisely because it would wipe entered amounts.
 
-## New client
+## New client — FIRST decide the billing model
+
+Ask (or infer) **who pays the vendors**, because it picks the tracker shape and
+they are not interchangeable:
+
+- **`--mode subscriptions`** (default) — YOU front the vendor costs and pass them
+  through. A month cell holds the **amount** billed. (Clarity i2: Hari pays Apollo,
+  Instantly, Azure and rebills.)
+- **`--mode services`** — the client owns and pays their own vendors, so you bill
+  **work**. The sheet gains a **Rate** column; a month cell holds a **quantity**
+  (hours/units) and amount = quantity x rate. Leave Rate blank on a row to bill a
+  flat amount, so retainers and hourly can share one sheet. (Cyber9 owns and pays
+  for its own GovCloud subscription.)
 
 ```
 python3 /Users/harit/AI-Projects/slash-commands/invoicing/invoice.py init \
   --client "<who you're billing>" \
   --company "<your company>" \
+  --mode <subscriptions|services> \
   --out "<directory for the workbook>" \
   --logo "<path to your logo PNG>" \
   [--months 12] [--rows 12] [--start YYYY-MM]
 ```
+
+Convention: one folder per client under `/Users/harit/OdysseyTech/Clients/<Name>/`.
+Company assets (logos, W-9) stay at the OdysseyTech root and are referenced by path.
 
 Then tell them exactly what to fill: the vendor rows in **Subscriptions**, and the
 amber cells in **Invoice** (payment due, bill-to address). Amber = still needs a
