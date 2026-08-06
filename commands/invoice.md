@@ -68,9 +68,12 @@ Offer to fill those figures before sending.
 
 Check and mention any of these that apply:
 
-- **Placeholder bill-to fields.** Empty address lines are simply omitted from the
-  PDF, so an incomplete address renders as a *plausible-looking* invoice. Say so
-  rather than letting it go out.
+- **Placeholder bill-to AND from fields.** Empty lines are simply omitted from the
+  PDF, so an incomplete address renders as a *plausible-looking* invoice. That cuts
+  both ways: a missing `From — street` / `city/state/zip` / `registration` means the
+  invoice has no remit-to at all and still looks finished. Check both blocks.
+- **`Payment details`.** If it's blank the Payment line doesn't render, so the client
+  has no way to pay you. Worth checking every time on a services invoice.
 - **Estimated vs verified amounts.** The *Verified* column is there for this. Call
   out anything still marked "Needs check", especially the largest lines.
 - **Metered vendors mid-month.** Anything usage-billed (cloud, AI APIs) isn't final
@@ -78,6 +81,12 @@ Check and mention any of these that apply:
 
 ## Notes
 
+- **Notes / Payment details** (Invoice sheet) render as a bordered block under the
+  totals — contractual context like "consumption is billed directly by Microsoft on
+  the client's own subscription", partner-pricing caveats, separate-SOW clauses. Both
+  are optional; the block is omitted entirely when both are empty.
+- **From — contact / email / street / city-state-zip / registration** render under the
+  logo. All optional, empty lines dropped.
 - Requires `openpyxl` and Chrome/Chromium (headless) for rendering. The PDF is real
   vector text, not a screenshot.
 - Layout mirrors the Odyssey Tech invoice: logo left, `INVOICE` right, bill-to and

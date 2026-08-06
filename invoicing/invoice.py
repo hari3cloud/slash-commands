@@ -184,6 +184,11 @@ def cmd_init(a) -> None:
         ("Terms (days)", 10),
         ("", ""),
         ("From — company", a.company or ""),
+        ("From — contact", ""),
+        ("From — email", ""),
+        ("From — street", ""),
+        ("From — city/state/zip", ""),
+        ("From — registration", ""),
         ("From — country", "United States"),
         ("From — logo path", a.logo or ""),
         ("From — footer", f"{a.company} © {date.today().year}" if a.company else ""),
@@ -198,6 +203,9 @@ def cmd_init(a) -> None:
         ("Bill to — email", ""),
         ("", ""),
         ("Include zero-value lines", "yes"),
+        ("", ""),
+        ("Notes", ""),
+        ("Payment details", ""),
     ]
     for r, (k, v) in enumerate(fields, start=4):
         if not k:
@@ -295,6 +303,27 @@ def render_html(cfg, month, items, total) -> str:
     addr = [g("Bill to — company"), g("Bill to — contact"), g("Bill to — street"),
             g("Bill to — suite"), g("Bill to — city/state/zip"), g("Bill to — country"),
             g("Bill to — phone"), g("Bill to — email")]
+
+    # WHO IS SENDING THIS. Previously absent, so a "from" address simply
+    # vanished — an invoice with no remit-to still looked complete, which is
+    # the worst kind of missing. Rendered under the mark; empty lines are
+    # dropped, so a partially-filled block degrades tidily.
+    who = " · ".join(x for x in [g("From — contact"), g("From — email")] if x)
+    where = " · ".join(x for x in [g("From — street"), g("From — city/state/zip")] if x)
+    from_lines = [x for x in [who, where, g("From — registration")] if x]
+    from_block = f'<div class="fromaddr">{"<br>".join(from_lines)}</div>' if from_lines else ""
+
+    # Notes + payment terms. Rendered only when present, so a tracker that
+    # doesn't use them is byte-identical to before.
+    notes_html = ""
+    n, pay = g("Notes"), g("Payment details")
+    if n or pay:
+        parts = []
+        if n:
+            parts.append(f"<strong>Notes.</strong> {n}")
+        if pay:
+            parts.append(f"<strong>Payment.</strong> {pay}")
+        notes_html = f'<div class="notes">{"<br><br>".join(parts)}</div>' 
     def qfmt(q: float) -> str:
         return str(int(q)) if q == int(q) else f"{q:g}"
     rows = "".join(
@@ -307,8 +336,12 @@ def render_html(cfg, month, items, total) -> str:
   * {{ box-sizing: border-box; }}
   body {{ font-family: Arial, Helvetica, sans-serif; color:#1a1a1a; font-size:10.5pt; margin:0; }}
   .top {{ display:flex; align-items:flex-start; justify-content:space-between; gap:24px; margin-bottom:26px; }}
-  .top img {{ width:3.1in; }}
+  .top img {{ width:3.1in; display:block; }}
+  .brandcol {{ max-width:3.4in; }}
   .wordmark {{ font-size:20pt; font-weight:bold; }}
+  .fromaddr {{ font-size:8.5pt; color:#555; line-height:1.55; margin-top:8px; max-width:3.1in; }}
+  .notes {{ margin-top:28px; background:#f7f8fa; border-left:3px solid #404040;
+            padding:12px 16px; font-size:9pt; color:#444; line-height:1.65; }}
   .title {{ text-align:right; }}
   .title .word {{ font-size:28pt; font-weight:bold; line-height:1; }}
   .mid {{ display:flex; justify-content:space-between; gap:30px; margin-bottom:26px; }}
@@ -324,7 +357,8 @@ def render_html(cfg, month, items, total) -> str:
   tfoot td.m {{ text-align:right; }}
   .foot {{ position:fixed; bottom:0; left:0; right:0; text-align:center; font-size:8.5pt; color:#666; }}
 </style></head><body>
-  <div class="top">{logo_tag}
+  <div class="top">
+    <div class="brandcol">{logo_tag}{from_block}</div>
     <div class="title"><div class="word">INVOICE</div><div>{g("From — country")}</div></div>
   </div>
   <div class="mid">
@@ -342,6 +376,7 @@ def render_html(cfg, month, items, total) -> str:
     <tbody>{rows}</tbody>
     <tfoot><tr><td colspan="3">TOTAL DUE (USD)</td><td class="m">${total:,.2f}</td></tr></tfoot>
   </table>
+  {notes_html}
   <div class="foot">{g("From — footer")}</div>
 </body></html>"""
 
